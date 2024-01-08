@@ -1,0 +1,231 @@
+class Customer {
+    orders = [];
+    constructor(name, address) {
+      this.name = name;
+      this.address = address;
+    }
+    addOrder(order) {
+      this.orders.push(order);
+    }
+  }
+  // let custumer1 = new Customer("Wuttha", "Nakhon Pathom");
+  // console.log(custumer1.name);
+  // console.log(custumer1.address);
+  
+  class Order {
+    payment = null;
+    orderDetails = [];
+    constructor(date, status) {
+      this.date = date;
+      this.status = status;
+    }
+    calcSubTotal() {
+      let subTotal = 0;
+      for (let i = 0; i < this.orderDetails.length; i++) {
+        subTotal += this.orderDetails[i].calcSubTotal();
+      }
+      return subTotal;
+      // return this.orderDetails.reduce(
+      //   (subTotal, orderDetail) => subTotal + orderDetail.calcSubTotal(),
+      //   0
+      // );
+    }
+    calcTax() {
+      let tax = 0;
+      for (let i = 0; i < this.orderDetails.length; i++) {
+        tax += this.orderDetails[i].calcTax();
+      }
+      return tax;
+    }
+    calcTotal() {
+      return this.calcSubTotal() + this.calcTax();
+    }
+    calcTotalWeight() {
+      let weight = 0;
+      for (let i = 0; i < this.orderDetails.length; i++) {
+        weight += this.orderDetails[i].calcTotalWeight();
+      }
+      return weight;
+    }
+  
+    addPayment(payment) {
+      this.payment = payment;
+    }
+    addOrderDetail(orderDetail) {
+      this.orderDetails.push(orderDetail);
+    }
+  }
+  
+  class OrderDetail {
+    item = null;
+    constructor(quantity, taxStatus) {
+      this.quantity = quantity;
+      this.taxStatus = taxStatus;
+    }
+    calcSubTotal() {
+      return this.item.getPriceForQuantity(this.quantity) + this.calcTax();
+    }
+    calcTax() {
+      return this.item.getTax(this.taxStatus);
+    }
+    calcTotalWeight() {
+      return this.item.shippingWeight;
+    }
+    addItem(item) {
+      this.item = item;
+    }
+  }
+  
+  class Item {
+    inStock = true;
+    constructor(shippingWeight, description, price) {
+      this.shippingWeight = shippingWeight;
+      this.description = description;
+      this.price = price;
+    }
+    setInStock(status) {
+      this.inStock = status;
+    }
+    getPriceForQuantity(quantity) {
+      return this.price * quantity;
+    }
+    getTax(taxStatus) {
+      if (taxStatus === "Tax included") {
+        return 0;
+      } else {
+        return this.price * 0.07;
+      }
+    }
+    inStock() {
+      return this.inStock;
+    }
+  }
+  
+  class Payment {
+    constructor(amount) {
+      this.amount = amount;
+    }
+  }
+  
+  class Cash extends Payment {
+    constructor(amount, cashTendered) {
+      super(amount);
+      this.cashTendered = cashTendered;
+    }
+  }
+  
+  class Check extends Payment {
+    constructor(amount, name, bankID) {
+      super(amount);
+      this.name = name;
+      this.bankID = bankID;
+    }
+    authorized() {
+      console.log("authorized");
+    }
+  }
+  
+  class Credit extends Payment {
+    constructor(amount, number, type, expDate) {
+      super(amount);
+      this.number = number;
+      this.type = type;
+      this.expDate = expDate;
+    }
+  }
+  
+  const oldMain = () => {
+    let custumer1 = new Customer("Worachet Uttha", "Nakhon Pathom");
+    // console.log(custumer1);
+    //Product Items
+    const item1 = new Item(0.3, "ออลอินวันบักเก็ต", 299);
+    const item2 = new Item(0.1, "ป๊อบบอมบ์แซ่บ", 39);
+    const item3 = new Item(0.2, "เดอะบอกซ์ ออลสตาร์", 159);
+    const item4 = new Item(0.2, "ชิคแอนด์แชร์ ทีมนักเก็ตส์ป๊อป", 99);
+    const item5 = new Item(0.4, "คอมโบข้าวไก่กรอบแกงเขียวหวาน เคเอฟซี", 89);
+  
+    //create order
+    const order1 = new Order("08/01/2567", "In process");
+  
+    //add order to a customer
+    custumer1.addOrder(order1);
+  
+    //create order detail
+    const orderDetail1 = new OrderDetail(5, "tax included");
+    orderDetail1.addItem(item2);
+    const orderDetail2 = new OrderDetail(2, "tax included");
+    orderDetail2.addItem(item5);
+  
+    //add order detail to an order
+    order1.addOrderDetail(orderDetail1);
+    order1.addOrderDetail(orderDetail2);
+    // #############################################################
+    //create order
+    const order2 = new Order("08/01/2567", "In process");
+  
+    //add order to a customer
+    custumer1.addOrder(order2);
+  
+    //create order detail
+    const orderDetail3 = new OrderDetail(3, "tax included");
+    orderDetail3.addItem(item1);
+    const orderDetail4 = new OrderDetail(1, "tax included");
+    orderDetail4.addItem(item4);
+    const orderDetail5 = new OrderDetail(2, "tax included");
+    orderDetail5.addItem(item3);
+  
+    //add order detail to an order
+    order2.addOrderDetail(orderDetail3);
+    order2.addOrderDetail(orderDetail4);
+    order2.addOrderDetail(orderDetail5);
+  
+    //console.log(orderDetail1);
+    // #############################################################
+  
+    //console.log(custumer1);
+  
+    //ชื่อ : Worachet Uttha
+    //จำนวนคำสั่งซื้อ : 2
+  
+    //คำสั่งซื้อที่ : 1
+    //ลำดับที่ 1 ป๊อบบอมบ์แซ่บ                       จำนวน 5 รายการ   ราคา 195 บาท
+    //ลำดับที่ 2 คอมโบข้าวไก่กรอบแกงเขียวหวาน เคเอฟซี  จำนวน 2 รายการ   ราคา 178 บาท
+    //รวมทั้งหมด 374 บาท
+  
+    //คำสั่งซื้อที่ : 2
+    //ลำดับที่ 1 ป๊อบบอมบ์แซ่บ                       จำนวน 5 รายการ   ราคา 195 บาท
+    //ลำดับที่ 2 คอมโบข้าวไก่กรอบแกงเขียวหวาน เคเอฟซี  จำนวน 2 รายการ   ราคา 178 บาท
+    //รวมทั้งหมด 374 บาท
+  
+    console.log("ชื่อ : " + custumer1.name);
+    console.log("จำนวนคำสั่งซื้อ : " + custumer1.orders.length);
+    for (let i = 0; i < custumer1.orders.length; i++) {
+      console.log("คำสั่งซื้อที่ :" + (i + 1));
+      let total = 0;
+      // console.log(custumer1.orders[i].orderDetails);
+      for (let k = 0; k < custumer1.orders[i].orderDetails.length; k++) {
+        const item = custumer1.orders[i].orderDetails[k].item;
+        const quantity = custumer1.orders[i].orderDetails[k].quantity;
+        const subTotal = quantity * item.price;
+        total += subTotal;
+        console.log(
+          "ลำดับที่ " +
+            (k + 1) +
+            " " +
+            item.description +
+            " จำนวน " +
+            quantity +
+            " รายการ " +
+            " ราคา " +
+            subTotal +
+            " บาท"
+        );
+      }
+      console.log("รวมทั้งหมด " + total + " บาท");
+    }
+  };
+  
+  const main = () => {};
+  
+  main();
+  
